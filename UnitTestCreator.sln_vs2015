@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestCreatorBase", "UnitTestCreator\UnitTestCreatorBase.csproj", "{453DFE02-5441-4ADD-ACC9-385AA6CE14CD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{453DFE02-5441-4ADD-ACC9-385AA6CE14CD}.Debug|x86.ActiveCfg = Debug|x86
+		{453DFE02-5441-4ADD-ACC9-385AA6CE14CD}.Debug|x86.Build.0 = Debug|x86
+		{453DFE02-5441-4ADD-ACC9-385AA6CE14CD}.Release|x86.ActiveCfg = Release|x86
+		{453DFE02-5441-4ADD-ACC9-385AA6CE14CD}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = UnitTestCreator\ UnitTestCreatorBase.csproj
+	EndGlobalSection
+EndGlobal
