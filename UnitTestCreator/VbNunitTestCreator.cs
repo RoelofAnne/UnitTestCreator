@@ -53,7 +53,7 @@ namespace  UnitTestCreator
 						temp.Add (" <Test()>");
 						string sub_name = line.Substring (0, line.IndexOf ("("));
 						sub_name = sub_name.Substring (sub_name.LastIndexOf (" "));
-						temp.Add ("Public Sub "+sub_name+"Test");
+						temp.Add ("Public Sub "+sub_name+"Test()");
 						temp.Add ("  'A few lines of help follow");
 						temp.Add ("  '' Classic syntax");
 						temp.Add ("  'Assert.IsTrue(2 + 2 = 4)");
@@ -73,7 +73,7 @@ namespace  UnitTestCreator
 						temp.Add (" <Test()>");
 						string function_name = line.Substring (0, line.IndexOf ("("));
 						function_name = function_name.Substring (function_name.LastIndexOf (" "));
-						temp.Add ("Public Sub "+function_name+"Test");
+						temp.Add ("Public Sub "+function_name+"Test()");
 						temp.Add ("  'You might want to use the class object to access the methods");
 						temp.Add ("  Dim test"+class_name+" As " + class_name + " = new " + class_name + "()");
 
