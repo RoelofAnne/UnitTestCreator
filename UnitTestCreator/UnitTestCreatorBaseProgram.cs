@@ -3,205 +3,48 @@ using System.Collections.Generic;
 
 namespace  UnitTestCreator
 {
-	// Use it wisely and only once on an project without tests!!!
-	class  UnitTestCreatorBase
-	{
-		public static List<string> anaylyseFile (string[] filecontent)
+	public class  UnitTestCreatorBase
+	{		
+		/// <summary>
+		/// Fetchs the details of the given project(s) location and creates the testfiles in testlocation
+		/// mimicing the original locations of the project files
+		/// </summary>
+		/// <param name="original_map">Original code location</param>
+		/// <param name="test_map">Test map location</param>
+		public static void CreateUnitTests (string original_map, string test_map)
 		{
-			bool isNamespace = false;
-			bool isclass = false;
-			string class_name = "";
+			//Check if there a vb files in the original location
+			var vb_files = System.IO.Directory.GetFiles (original_map, "*.vb", System.IO.SearchOption.AllDirectories);
 
-			List<string> temp = new List<string> ();
-			if (filecontent [0] != "Generated Nunit test file, please adjust to your need.") {
-				temp.Add ("'Generated unit test file, please adjust to your need.");
-				temp.Add ("'Copyright Roelof Anne Schoenmaker");
-				temp.Add ("");
-				temp.Add ("Option Explicit On");
-				temp.Add ("Imports NUnit.Framework");
-				temp.Add ("");
-
-				//loop through the content to analyse
-				foreach (String line in filecontent) {
-					if (line.Contains ("Namespace") && !line.Contains ("End")) {
-						temp.Add (line);
-						isNamespace = true;
-					} else if (line.Contains ("Class") && !line.Contains ("End")) {
-						temp.Add ("<TestFixture()>");
-						class_name = line.Replace ("Private", "Protected").Replace ("Protected", "Public").Replace ("Public Class", "");
-						temp.Add (line.Replace("Private","Protected").Replace("Protected","Public") + "Test");
-						temp.Add (" Inherits AssertionHelper");
-						temp.Add ("");
-						temp.Add (" <SetUp()> _");
-						temp.Add (" Protected Sub SetUp()");
-						temp.Add ("  'This sub can be used to setup variables used in Nunit tests");
-						temp.Add (" End Sub");
-						temp.Add ("");
-						temp.Add (" <TearDown()> _");
-						temp.Add (" Protected Sub TearDown()");
-						temp.Add ("  'This sub can be used to TearDown the setupped variables used in Nunit tests");
-						temp.Add (" End Sub");
-						isclass = true;
-					} else if (line.Contains ("Sub") && !line.Contains ("End")) {
-						temp.Add ("");
-						temp.Add (" 'Maybe you can think of a test for this sub?");
-						temp.Add (" 'Or rewrite to a function call and test that function?");
-						temp.Add (" <Test()>");
-						string sub_name = line.Substring (0, line.IndexOf ("("));
-						sub_name = sub_name.Substring (sub_name.LastIndexOf (" "));
-						temp.Add ("Public Sub "+sub_name+"Test");
-						temp.Add ("  'A few lines of help follow");
-						temp.Add ("  '' Classic syntax");
-						temp.Add ("  'Assert.IsTrue(2 + 2 = 4)");
-						temp.Add ("  '' Helper syntax");
-						temp.Add ("  'Assert.That(2 + 2 = 4, [Is].True)");
-						temp.Add ("  'Assert.That(2 + 2 = 4)");
-						temp.Add ("  ''Inherited syntax");
-						temp.Add ("  'Expect(2 + 2 = 4, True)");
-						temp.Add ("  'Expect(2 + 2 = 4)");
-						temp.Add ("");
-						temp.Add ("  'To indicate that this test it not yet valid");
-						temp.Add ("  Assert.IsTrue(False)");
-						temp.Add ("  'Actual parameters of mentioned sub are: " + line.Replace (line.Substring (0, line.IndexOf ("(")), "").Replace(")",""));
-						temp.Add (" End Sub");
-					} else if (line.Contains ("Function") && !line.Contains ("End")) {
-						temp.Add ("");
-						temp.Add (" <Test()>");
-						string function_name = line.Substring (0, line.IndexOf ("("));
-						function_name = function_name.Substring (function_name.LastIndexOf (" "));
-						temp.Add ("Public Sub "+function_name+"Test");
-						temp.Add ("  'You might want to use the class object to access the methods");
-						temp.Add ("  Dim test"+class_name+" As " + class_name + " = new " + class_name + "()");
-
-						// If there are parameters, then add them
-						string parameters = "";
-						if (!line.Contains("()"))
-						{
-							char[] splitchar = {',',')'};
-							var list_of_parameters = line.Replace (line.Substring (0, line.IndexOf ("(")+1), "").Split (splitchar);
-							foreach (string parameter in list_of_parameters)
-							{
-								string param = parameter.Trim();
-								if (!param.StartsWith("As"))
-								{
-
-									// Set default expected
-									if (param.EndsWith("As String"))
-									{
-										temp.Add("  Dim "+param.Replace("ByVal","").Replace("ByRef","") +" = String.Empty");
-									}
-									else if (param.EndsWith("As Bool"))
-									{
-										temp.Add("  Dim "+param.Replace("ByVal","").Replace("ByRef","") + " = False");
-									}// Other types may be extended later
-									else
-									{
-										temp.Add("  Dim "+param.Replace("ByVal","").Replace("ByRef","") + " = Nothing");
-									}
-
-									parameters = parameters + "," +param.Substring (0, param.IndexOf (" As")).Replace("ByVal","").Replace("ByRef","");
-								}
-							}
-							if (parameters.Length>0)
-							{
-								parameters = parameters.Substring(1);
-							}
-						}
-
-						// Set default expected
-						if (line.EndsWith("As String"))
-						{
-							temp.Add ("  Dim expected As String = String.Empty");
-						}
-						else if (line.EndsWith("As Bool"))
-						{
-							temp.Add ("  Dim expected As Bool = False");
-						}// Other types may be extended later
-						else
-						{
-							temp.Add ("  Dim expected = Nothing");
-						}
-
-						temp.Add ("  Assert.AreEqual(expected, test." + function_name + "("+parameters+"))");
-
-						temp.Add (" End Sub");
+			if (vb_files.Length > 0) {
+				VbNunitTestCreator vb_nunit_creator = new VbNunitTestCreator();
+				foreach (string file in vb_files) {
+					if (!file.EndsWith (".designer.vb") && !file.EndsWith ("Test.vb")) {
+						vb_nunit_creator.createTestFileFrom (file, test_map);
 					}
-
-				}
-
-				if (isclass) {
-					temp.Add ("End Class");
-				}
-				if (isNamespace) {
-					temp.Add ("End Namespace");
-				}
-
-			}
-			return temp;
-
-		}
-
-		public static void createTestFileFrom (string filepath, string testmap)
-		{
-			var file_content = System.IO.File.ReadAllLines (filepath);
-
-			String samepath = samePart (filepath, testmap);
-			String stripped_filename_and_special_path = filepath.Replace (samepath, "");
-			String test_file_location = testmap + stripped_filename_and_special_path.Replace (".vb", "Test.vb");
-
-			if (test_file_location.Contains ("/")) {
-				if (!System.IO.Directory.Exists (test_file_location.Substring (0, test_file_location.LastIndexOf ("/")))) {
-					System.IO.Directory.CreateDirectory (test_file_location.Substring (0, test_file_location.LastIndexOf ("/")));
-				}
-			} else {
-				if (!System.IO.Directory.Exists (test_file_location.Substring (0, test_file_location.LastIndexOf ("\\")))) {
-					System.IO.Directory.CreateDirectory (test_file_location.Substring (0, test_file_location.LastIndexOf ("\\")));
 				}
 			}
 
-			// Only once a testfile is made, because of user changes
-			if (!System.IO.File.Exists (test_file_location)) {
-				System.IO.File.AppendAllLines (test_file_location, anaylyseFile (file_content));
-			}
+			//Check if there a cs files in the original location
+			var cs_files = System.IO.Directory.GetFiles (original_map, "*.cs", System.IO.SearchOption.AllDirectories);
 
-		}
-
-		public static string samePart (string dir, string test_map)
-		{
-			string samefromstart = "";
-			int locator = 0;
-			if (dir.Length < test_map.Length) {
-				int length = dir.Length - 1;
-				while (dir[locator]==test_map[locator] && locator < length) {
-					locator++;
-				}
-				if (locator > 0) {
-					samefromstart = dir.Substring (0, locator);
-				}
-			} else {
-				int length = test_map.Length - 1;
-				while (dir[locator]==test_map[locator] && locator < length) {
-					locator++;
-				}
-				if (locator > 0) {
-					samefromstart = test_map.Substring (0, locator);
-				}
-			}
-
-			return samefromstart;
-		}
-
-		public static void FetchDetails (string dir, string test_map)
-		{
-			var vb_files = System.IO.Directory.GetFiles (dir, "*.vb", System.IO.SearchOption.AllDirectories);
-
-			foreach (string file in vb_files) {
-				if (!file.EndsWith (".designer.vb") && !file.EndsWith ("Test.vb")) {
-					createTestFileFrom (file, test_map);
+			if (cs_files.Length > 0) {
+				CsNunitTestCreator cs_nunit_creator = new CsNunitTestCreator();
+				foreach (string file in vb_files) {
+					if (!file.EndsWith (".designer.cs") && !file.EndsWith ("Test.cs")) {
+						cs_nunit_creator.createTestFileFrom (file, test_map);
+					}
 				}
 			}
 		}
 
+		/// <summary>
+		/// The entry point of the program, where the program control starts and ends.
+		/// </summary>
+		/// <param name="args">"folder={solution}={test}"
+		///  , where {solution} is the base of the solution tree and {test} is 
+		///  the location where the tree of testfiles is placed.
+		/// </param>
 		public static void Main (string[] args)
 		{
 			if (args.GetLength (0) == 1) {
@@ -212,7 +55,7 @@ namespace  UnitTestCreator
 					String test_maindirectory = local_directory_and_testmainfolder.Substring (local_directory_and_testmainfolder.IndexOf ("=") + 1);
 					if (System.IO.Directory.Exists (local_directory)) {
 						System.IO.Directory.CreateDirectory (test_maindirectory);
-						FetchDetails (local_directory, test_maindirectory);
+						CreateUnitTests (local_directory, test_maindirectory);
 					} else {
 						Console.WriteLine ("Next time, Next time,...");
 					}
