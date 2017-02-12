@@ -64,7 +64,7 @@ namespace  UnitTestCreator
 						temp.Add ("  'Expect(2 + 2 = 4, True)");
 						temp.Add ("  'Expect(2 + 2 = 4)");
 						temp.Add ("");
-						temp.Add ("  'To indicate that this test it not yet valid");
+						temp.Add ("  'To indicate that this test is not yet valid");
 						temp.Add ("  Assert.IsTrue(False)");
 						temp.Add ("  'Actual parameters of mentioned sub are: " + line.Replace (line.Substring (0, line.IndexOf ("(")), "").Replace(")",""));
 						temp.Add (" End Sub");
@@ -126,7 +126,7 @@ namespace  UnitTestCreator
 							temp.Add ("  Dim expected = Nothing");
 						}
 
-						temp.Add ("  Assert.AreEqual(expected, test." + function_name + "("+parameters+"))");
+						temp.Add ("  Assert.AreEqual(expected, test"+class_name+"." + function_name + "("+parameters+"))");
 
 						temp.Add (" End Sub");
 					}
